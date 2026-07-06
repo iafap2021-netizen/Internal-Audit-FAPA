@@ -295,6 +295,127 @@
             }
         }
 
+        /* Detail Section */
+        .detail-section {
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px 30px;
+            margin-top: 20px;
+        }
+
+        .detail-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 12px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+
+        .detail-toggle:hover {
+            background: #f3f4f6;
+            border-color: #667eea;
+        }
+
+        .detail-toggle.expanded {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .detail-icon {
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .detail-toggle.expanded .detail-icon {
+            transform: rotate(90deg);
+        }
+
+        .detail-content {
+            display: none;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .detail-content.show {
+            display: block;
+        }
+
+        .detail-content-header {
+            background: #f3f4f6;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .detail-table th {
+            background: #f9fafb;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .detail-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #555;
+        }
+
+        .detail-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .data-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: white;
+        }
+
+        .data-item {
+            padding: 10px;
+            background: #f9fafb;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .data-item-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .data-item-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #374151;
+        }
+
         /* Print Styles */
         @media print {
             body {
@@ -308,6 +429,14 @@
 
             .container {
                 box-shadow: none;
+            }
+
+            .detail-content {
+                display: block !important;
+            }
+
+            .detail-toggle {
+                display: none;
             }
         }
     </style>
@@ -480,6 +609,57 @@
             });
         }
 
+        // Detail data from Excel
+        const detailDataMap = {
+            "BASTP Lokal": {
+                sheet: "08.(GMK7)BASTP Lokal",
+                summary: {
+                    "Total Data": "52 baris",
+                    "Periode": "Feb - Mar 2026",
+                    "Lokasi": "GMK-7, MCA-1, MCA-2, SAU-1"
+                },
+                columns: ["PT", "BASTP/Bulan", "Kontraktor", "Afd.", "Tipe Jalan", "Blok", "Harga (Rp)", "Satuan", "Qty"],
+                rows: [
+                    ["MCA-1", "082/NDK-MCA1-KBN/II/2026", "AKHAMAD IJAI", "6", "Thining Out Pokok Jantan", "A78", "100000", "Pkk", "12"],
+                    ["MCA-1", "082/NDK-MCA1-KBN/II/2026", "AKHAMAD IJAI", "6", "Thining Out Pokok Rapat", "A78", "50000", "Pkk", "135"],
+                    ["MCA-1", "082/NDK-MCA1-KBN/II/2026", "AKHAMAD IJAI", "6", "Thining Out Pokok Rapat", "B80", "100000", "Pkk", "21"],
+                    ["MCA-1", "070/NDK-MCA1-KBN/II/2026", "AKHAMAD IJAI", "6", "Cetak & Pasang Patok TPH", "A74", "50000", "Unit", "34"]
+                ]
+            },
+            "Efisiensi Panen": {
+                sheet: "13.(GMK7)Ef. Panen Mei'26",
+                summary: {
+                    "Total Areal": "107.78 Ha",
+                    "Total Pohon": "13.000 Pkk",
+                    "Periode": "Mei 2026",
+                    "Lokasi": "PT.SAU-1, PT.MCA-1, PT.MCA-2"
+                },
+                columns: ["No", "PT", "TT", "Afd", "Blok", "Luas (Ha)", "Jumlah Pkk", "Tipe", "Tanggal Panen"],
+                rows: [
+                    ["1", "SAU-1", "2014", "I", "H42", "28.46", "3822", "V", "13 Mei 2026"],
+                    ["2", "SAU-1", "2014", "II", "L30", "27.41", "4000", "V", "13 Mei 2026"],
+                    ["3", "SAU-1", "2014", "III", "F45", "23.47", "2577", "V", "15 Mei 2026"],
+                    ["4", "SAU-1", "2014", "IV", "V38", "28.44", "2601", "V", "16 Mei 2026"]
+                ]
+            },
+            "Tanaman - Bibit": {
+                sheet: "09.(MCA1)Posisi Bibit",
+                summary: {
+                    "Total Bibit": "34.650 Kcb",
+                    "Varietas": "FR1, FR2",
+                    "Kondisi": "Seleksi 253 Kcb",
+                    "Periode": "Mei 2026"
+                },
+                columns: ["PT", "Tahap", "Varietas", "Plot", "Dikirim (Kcb)", "Diterima (Kcb)", "Selisih", "Seleksi (Kcb)"],
+                rows: [
+                    ["MCA-1", "1", "FR1", "PN", "24150", "24150", "0", "210"],
+                    ["MCA-1", "1", "FR2", "PN", "10500", "10500", "0", "43"],
+                    ["MCA-1", "2", "FR1", "-", "5250", "5250", "0", "11"],
+                    ["MCA-1", "2", "FR2", "-", "5250", "5250", "0", "9"]
+                ]
+            }
+        };
+
         // Render table
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
@@ -500,6 +680,9 @@
                     ? `status-${row.status.toLowerCase().replace(/ /g, '-')}`
                     : `status-${row.status.toLowerCase().replace(/ /g, '-')}`;
 
+                const detailId = `detail-${row.id}`;
+                const hasDetail = row.bidang in detailDataMap;
+
                 tr.innerHTML = `
                     <td><strong>${row.id}</strong></td>
                     <td>${row.bidang}</td>
@@ -508,8 +691,62 @@
                     <td>${row.temuan}</td>
                     <td><strong>Penyebab:</strong> ${row.faktor_penyebab}<br><strong>Saran:</strong> ${row.saran}</td>
                 `;
-                tbody.appendChild(tr);
+
+                // Add detail row if available
+                if (hasDetail) {
+                    tr.style.cursor = 'pointer';
+                    tr.style.position = 'relative';
+                    tr.onclick = (e) => {
+                        if (e.target.tagName !== 'A') {
+                            toggleDetail(detailId);
+                        }
+                    };
+
+                    tbody.appendChild(tr);
+
+                    // Add detail row
+                    const detailRow = document.createElement('tr');
+                    detailRow.id = detailId;
+                    detailRow.style.display = 'none';
+                    detailRow.innerHTML = `
+                        <td colspan="6">
+                            <div class="detail-section">
+                                <div class="detail-content show">
+                                    <div class="detail-content-header">📊 Data Detail dari Excel Sheet: ${detailDataMap[row.bidang].sheet}</div>
+                                    <div class="data-summary">
+                                        ${Object.entries(detailDataMap[row.bidang].summary).map(([key, val]) =>
+                                            `<div class="data-item"><div class="data-item-label">${key}</div><div class="data-item-value">${val}</div></div>`
+                                        ).join('')}
+                                    </div>
+                                    <table class="detail-table">
+                                        <thead>
+                                            <tr>
+                                                ${detailDataMap[row.bidang].columns.map(col => `<th>${col}</th>`).join('')}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${detailDataMap[row.bidang].rows.map(rowData =>
+                                                `<tr>${rowData.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+                                            ).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(detailRow);
+                } else {
+                    tbody.appendChild(tr);
+                }
             });
+        }
+
+        // Toggle detail section
+        function toggleDetail(detailId) {
+            const detailRow = document.getElementById(detailId);
+            if (detailRow) {
+                detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
+            }
         }
 
         // Apply filters
