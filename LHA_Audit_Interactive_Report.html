@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LHA Operasional GMK-7 - Interactive Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 5px 0;
+        }
+
+        /* Summary Cards */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .card.signifikan {
+            border-left-color: #dc2626;
+        }
+
+        .card.non-signifikan {
+            border-left-color: #16a34a;
+        }
+
+        .card h3 {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .card.signifikan .number {
+            color: #dc2626;
+        }
+
+        .card.non-signifikan .number {
+            color: #16a34a;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            padding: 25px 30px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .search-box {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:focus,
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box {
+            padding: 10px 12px;
+            min-width: 250px;
+        }
+
+        .btn-reset {
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #d1d5db;
+        }
+
+        /* Table Section */
+        .table-section {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #e5e7eb;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        tbody tr.hidden {
+            display: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-signifikan {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-non-signifikan {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-tidak-signifikan {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Lokasi Badge */
+        .lokasi-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #f0f9ff;
+            color: #0369a1;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #f9fafb;
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .summary-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .filter-section {
+                display: none;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 LAPORAN HASIL AUDIT OPERASIONAL</h1>
+            <p><strong>GMK-7 (PT.MCA-1, PT.MCA-2 & PT.SAU-1)</strong></p>
+            <p>Periode Audit: 14 - 25 Mei 2026 | Nomor: 018/LHA-IA/KBR/V/2026</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-section" id="summarySection">
+            <div class="card">
+                <h3>Total Temuan</h3>
+                <div class="number" id="totalFindings">5</div>
+            </div>
+            <div class="card signifikan">
+                <h3>Signifikan</h3>
+                <div class="number" id="countSignifikan">2</div>
+            </div>
+            <div class="card non-signifikan">
+                <h3>Non-Signifikan</h3>
+                <div class="number" id="countNonSignifikan">2</div>
+            </div>
+            <div class="card">
+                <h3>Tidak Signifikan</h3>
+                <div class="number" id="countTidakSignifikan">1</div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filterBidang">Bidang:</label>
+                <select id="filterBidang" onchange="applyFilters()">
+                    <option value="">Semua Bidang</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterLokasi">Lokasi:</label>
+                <select id="filterLokasi" onchange="applyFilters()">
+                    <option value="">Semua Lokasi</option>
+                    <option value="GMK-7">GMK-7</option>
+                    <option value="PT.MCA-1">PT.MCA-1</option>
+                    <option value="PT.MCA-1 & PT.MCA-2">PT.MCA-1 & PT.MCA-2</option>
+                    <option value="PT.SAU-1">PT.SAU-1</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterStatus">Status:</label>
+                <select id="filterStatus" onchange="applyFilters()">
+                    <option value="">Semua Status</option>
+                    <option value="SIGNIFIKAN">Signifikan</option>
+                    <option value="NON-SIGNIFIKAN">Non-Signifikan</option>
+                    <option value="TIDAK SIGNIFIKAN">Tidak Signifikan</option>
+                </select>
+            </div>
+
+            <div class="filter-group" style="flex: 1;">
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Cari temuan, faktor, atau saran..." onkeyup="applyFilters()">
+            </div>
+
+            <button class="btn-reset" onclick="resetFilters()">Reset</button>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <table id="findingsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">No</th>
+                        <th style="width: 18%;">Bidang Pemeriksaan</th>
+                        <th style="width: 14%;">Lokasi</th>
+                        <th style="width: 12%;">Status</th>
+                        <th style="width: 22%;">Temuan</th>
+                        <th style="width: 22%;">Faktor Penyebab & Saran</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div class="no-results" id="noResults" style="display: none;">
+                ℹ️ Tidak ada data yang sesuai dengan filter
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Internal Audit Regional Kaltim | Kebun Sei Ratah & Sei Melahah | © 2026</p>
+        </div>
+    </div>
+
+    <script>
+        // Data Findings
+        const findings = [
+            {
+                id: 1,
+                bidang: "BASTP Induk",
+                lokasi: "GMK-7",
+                status: "TIDAK SIGNIFIKAN",
+                temuan: "Tidak ada temuan signifikan",
+                faktor_penyebab: "-",
+                saran: "-",
+                time_frame: "-"
+            },
+            {
+                id: 2,
+                bidang: "BASTP Lokal",
+                lokasi: "PT.SAU-1",
+                status: "SIGNIFIKAN",
+                temuan: "Sumur Bor 043 hanya beroperasi 1 minggu, belum ada follow-up garansi (Rp.45.900.000)",
+                faktor_penyebab: "Konslet di sambungan kabel dekat mesin pompa",
+                saran: "FU ke kontraktor untuk memperbaiki sambungan kabel yang konslet",
+                time_frame: "4 Juni 2026"
+            },
+            {
+                id: 3,
+                bidang: "Tanaman - Bibit",
+                lokasi: "PT.MCA-1",
+                status: "SIGNIFIKAN",
+                temuan: "4.648 pkk bibit PN belum transplanting, 17.5% terserang Culvularia, 45.48 ha belum tanam",
+                faktor_penyebab: "Kekurangan tenaga kerja, kondisi bibit lembab saat transplanting, bibit masih muda (5 bln)",
+                saran: "Percepat transplanting ke MN, semprot fungisida, percepatan progress tanam",
+                time_frame: "30 Agustus 2026"
+            },
+            {
+                id: 4,
+                bidang: "Efisiensi Panen",
+                lokasi: "PT.MCA-1 & PT.MCA-2",
+                status: "NON-SIGNIFIKAN",
+                temuan: "Loses panen 0,47% (tertinggi 1,28% di Afd.I blok D09)",
+                faktor_penyebab: "Pemanen kurang teliti, supervisi tidak mengecek sampai ujung teras",
+                saran: "Konsisten pemberian denda panen & supervisi sampai areal rawan",
+                time_frame: "22 Mei 2026"
+            },
+            {
+                id: 5,
+                bidang: "Efisiensi Panen",
+                lokasi: "PT.SAU-1",
+                status: "NON-SIGNIFIKAN",
+                temuan: "Loses panen 0,25%",
+                faktor_penyebab: "Teknis pemanenan & pengawasan",
+                saran: "Optimalisasi pengawasan panen",
+                time_frame: "30 Juni 2026"
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFilters();
+            renderTable(findings);
+            updateSummary(findings);
+        });
+
+        // Initialize filter dropdowns
+        function initializeFilters() {
+            const bidangFilter = document.getElementById('filterBidang');
+            const bidangs = [...new Set(findings.map(f => f.bidang))];
+
+            bidangs.forEach(bidang => {
+                const option = document.createElement('option');
+                option.value = bidang;
+                option.textContent = bidang;
+                bidangFilter.appendChild(option);
+            });
+        }
+
+        // Render table
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                const statusClass = row.status.includes('SIGNIFIKAN')
+                    ? `status-${row.status.toLowerCase().replace(/ /g, '-')}`
+                    : `status-${row.status.toLowerCase().replace(/ /g, '-')}`;
+
+                tr.innerHTML = `
+                    <td><strong>${row.id}</strong></td>
+                    <td>${row.bidang}</td>
+                    <td><span class="lokasi-badge">${row.lokasi}</span></td>
+                    <td><span class="status-badge ${statusClass}">${row.status}</span></td>
+                    <td>${row.temuan}</td>
+                    <td><strong>Penyebab:</strong> ${row.faktor_penyebab}<br><strong>Saran:</strong> ${row.saran}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const bidang = document.getElementById('filterBidang').value;
+            const lokasi = document.getElementById('filterLokasi').value;
+            const status = document.getElementById('filterStatus').value;
+            const search = document.getElementById('searchBox').value.toLowerCase();
+
+            const filtered = findings.filter(f => {
+                const matchBidang = !bidang || f.bidang === bidang;
+                const matchLokasi = !lokasi || f.lokasi === lokasi;
+                const matchStatus = !status || f.status === status;
+                const matchSearch = !search ||
+                    f.temuan.toLowerCase().includes(search) ||
+                    f.faktor_penyebab.toLowerCase().includes(search) ||
+                    f.saran.toLowerCase().includes(search) ||
+                    f.bidang.toLowerCase().includes(search);
+
+                return matchBidang && matchLokasi && matchStatus && matchSearch;
+            });
+
+            renderTable(filtered);
+            updateSummary(filtered);
+        }
+
+        // Update summary cards
+        function updateSummary(data) {
+            const signifikan = data.filter(f => f.status === 'SIGNIFIKAN').length;
+            const nonSignifikan = data.filter(f => f.status === 'NON-SIGNIFIKAN').length;
+            const tidakSignifikan = data.filter(f => f.status === 'TIDAK SIGNIFIKAN').length;
+
+            document.getElementById('totalFindings').textContent = data.length;
+            document.getElementById('countSignifikan').textContent = signifikan;
+            document.getElementById('countNonSignifikan').textContent = nonSignifikan;
+            document.getElementById('countTidakSignifikan').textContent = tidakSignifikan;
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('filterBidang').value = '';
+            document.getElementById('filterLokasi').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('searchBox').value = '';
+            renderTable(findings);
+            updateSummary(findings);
+        }
+    </script>
+</body>
+</html>
